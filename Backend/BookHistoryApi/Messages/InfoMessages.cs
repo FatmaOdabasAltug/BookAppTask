@@ -6,8 +6,6 @@ namespace BookHistoryApi.Messages
         public const string DescriptionChanged = "Description changed from '{0}' to '{1}.";
         public const string PublishDateChanged = "Publish date changed from '{0}' to '{1}.";
         public const string AuthorsChanged = "Authors changed from '{0}' to '{1}.";
-        
-
-
+        public const string NewBookAdded = "New book added .Title : '{0}' .";
     }
 }

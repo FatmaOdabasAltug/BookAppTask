@@ -1,6 +1,6 @@
 using AutoMapper;
-using BookHistoryApi.Models.Entities;
 using BookHistoryApi.Models.DTOs;
+using BookHistoryApi.Models.Entities;
 
 namespace BookHistoryApi.Mappings
 {

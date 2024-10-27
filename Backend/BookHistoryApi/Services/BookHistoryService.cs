@@ -1,10 +1,10 @@
+using System.Threading.Tasks;
 using AutoMapper;
 using BookHistoryApi.Data;
 using BookHistoryApi.Models.DTOs;
 using BookHistoryApi.Models.Entities;
 using BookHistoryApi.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
-using System.Threading.Tasks;
 
 namespace BookHistoryApi.Services
 {

@@ -11,7 +11,7 @@ namespace BookHistoryApi.Services
         public void AddAuthor(AuthorDto author)
         {
             // Add the new author to the list
-            _authors.Add(author); 
+            _authors.Add(author);
             Console.WriteLine($"Adding Author: {author.Id}, Name: {author.Name}"); // Log the addition
         }
 

@@ -11,14 +11,22 @@ var builder = WebApplication.CreateBuilder(args);
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 
 // Register ApplicationDbContext and configure it to use SQL Server with the specified connection string
+
+
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseSqlServer(connectionString));
+options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 // Register controller services to the DI container
 builder.Services.AddControllers();
 
 // Register your AuthorService
-builder.Services.AddSingleton<IAuthorService, AuthorService>();
+builder.Services.AddScoped<IAuthorService, AuthorService>();
+
+// Register IBookService and BookService
+builder.Services.AddScoped<IBookService, BookService>();
+
+// Register IBookHistoryService and BookHistoryService
+builder.Services.AddScoped<IBookHistoryService, BookHistoryService>();
 
 // Register AutoMapper
 builder.Services.AddAutoMapper(typeof(MappingProfile));
