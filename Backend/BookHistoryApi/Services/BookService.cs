@@ -114,7 +114,7 @@ namespace BookHistoryApi.Services
             var existingBook = await _dbContext.Books.FirstOrDefaultAsync(b => b.Id == bookId);
             if (existingBook == null)
             {
-                throw new KeyNotFoundException(string.Format(ErrorMessages.BookIdNotFound, id));
+                throw new KeyNotFoundException(string.Format(ErrorMessages.BookIdNotFound, bookId));
             }
             if (existingBook.Title != bookDto.Title)
             {
