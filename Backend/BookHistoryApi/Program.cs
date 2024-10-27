@@ -1,9 +1,9 @@
 using BookHistoryApi.Data;
-using BookHistoryApi.Services.Interfaces;
-using BookHistoryApi.Services;
-using Microsoft.EntityFrameworkCore;
-using BookHistoryApi.Models.DTOs;
 using BookHistoryApi.Mappings;
+using BookHistoryApi.Models.DTOs;
+using BookHistoryApi.Services;
+using BookHistoryApi.Services.Interfaces;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -14,7 +14,8 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
 
 
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
-options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"))
+);
 
 // Register controller services to the DI container
 builder.Services.AddControllers();
@@ -40,9 +41,9 @@ var app = builder.Build();
 // Configure middleware for development environment
 if (app.Environment.IsDevelopment())
 {
-    app.UseDeveloperExceptionPage(); 
-    app.UseSwagger();                
-    app.UseSwaggerUI();              
+    app.UseDeveloperExceptionPage();
+    app.UseSwagger();
+    app.UseSwaggerUI();
 }
 
 app.UseHttpsRedirection();
@@ -59,7 +60,7 @@ void SeedDummyAuthors(IServiceProvider services)
     using (var scope = services.CreateScope())
     {
         var authorService = scope.ServiceProvider.GetRequiredService<IAuthorService>();
-        
+        authorService.DeleteAllAuthors();
         // Dummy author data
         var dummyAuthors = new List<AuthorDto>
         {
@@ -72,7 +73,7 @@ void SeedDummyAuthors(IServiceProvider services)
             new AuthorDto { Id = 7, Name = "Jane Austen" },
             new AuthorDto { Id = 8, Name = "F. Scott Fitzgerald" },
             new AuthorDto { Id = 9, Name = "Stephen King" },
-            new AuthorDto { Id = 10, Name = "Leo Tolstoy" }
+            new AuthorDto { Id = 10, Name = "Leo Tolstoy" },
         };
 
         // Use the AuthorService to add the dummy authors

@@ -15,6 +15,8 @@ namespace BookHistoryApi.Mappings
             // Create a mapping between Book and BookDto
             CreateMap<Book, BookDto>() // Entity to DTO
                 .ReverseMap(); // DTO to Entity
+
+            CreateMap<AuthorDto, Author>().ReverseMap();
         }
     }
 }

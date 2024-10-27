@@ -4,8 +4,9 @@ namespace BookHistoryApi.Services.Interfaces
 {
     public interface IAuthorService
     {
-        IEnumerable<AuthorDto> GetAuthors();
+        Task<IEnumerable<AuthorDto>> GetAuthors();
         void AddAuthor(AuthorDto author);
-        IEnumerable<string> GetAuthorNamesByIds (IEnumerable<int> authorIds);
+        Task<IEnumerable<string>> GetAuthorNamesByIds(IEnumerable<int> authorIds);
+        void DeleteAllAuthors();
     }
 }

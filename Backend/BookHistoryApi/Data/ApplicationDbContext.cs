@@ -11,6 +11,7 @@ namespace BookHistoryApi.Data
         // DbSet properties for each entity
         public DbSet<Book> Books { get; set; } // Represents the Books table
         public DbSet<BookHistory> BookHistories { get; set; } // Represents the BookHistory table
+        public DbSet<Author> Authors { get; set; } // Represents the Authors table
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

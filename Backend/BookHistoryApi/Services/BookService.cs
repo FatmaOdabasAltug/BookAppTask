@@ -110,24 +110,29 @@ namespace BookHistoryApi.Services
                 );
             }
 
-            // Check if the title is unique for updates
-            if (!await IsTitleUniqueAsync(bookDto.Title))
+            // Retrieve the existing book
+            var existingBook = await _dbContext.Books.FirstOrDefaultAsync(b => b.Id == bookId);
+            if (existingBook == null)
             {
-                throw new InvalidOperationException(
-                    string.Format(ErrorMessages.BookTitleConflict, bookDto.Title)
-                );
+                throw new KeyNotFoundException(string.Format(ErrorMessages.BookIdNotFound, id));
+            }
+            if (existingBook.Title != bookDto.Title)
+            {
+                // Check if the title is unique for updates
+                if (!await IsTitleUniqueAsync(bookDto.Title))
+                {
+                    throw new InvalidOperationException(
+                        string.Format(ErrorMessages.BookTitleConflict, bookDto.Title)
+                    );
+                }
             }
 
-            // Retrieve the existing book
-            var existingBook = await GetBookByIdAsync(bookId);
             using var updateTransaction = await _dbContext.Database.BeginTransactionAsync();
             try
             {
                 // Update the entity and log changes if modified
                 await UpdateAndAddBookHistoryAsync(existingBook, bookDto);
 
-                // Save updates to the database
-                await _dbContext.SaveChangesAsync();
                 // Commit the transaction
                 await updateTransaction.CommitAsync();
 
@@ -144,7 +149,7 @@ namespace BookHistoryApi.Services
             }
         }
 
-        private async Task UpdateAndAddBookHistoryAsync(BookDto existingBook, BookDto bookDto)
+        private async Task UpdateAndAddBookHistoryAsync(Book existingBook, BookDto bookDto)
         {
             // Add BookHistory and update title if changed
             if (existingBook.Title != bookDto.Title)
@@ -183,8 +188,10 @@ namespace BookHistoryApi.Services
             }
 
             // Check for author changes
-            var existingAuthorNames = _authorService.GetAuthorNamesByIds(existingBook.AuthorIds);
-            var newAuthorNames = _authorService.GetAuthorNamesByIds(bookDto.AuthorIds);
+            var existingAuthorNames = await _authorService.GetAuthorNamesByIds(
+                existingBook.AuthorIds
+            );
+            var newAuthorNames = await _authorService.GetAuthorNamesByIds(bookDto.AuthorIds);
             if (!existingAuthorNames.SequenceEqual(newAuthorNames))
             {
                 var oldAuthors = string.Join(", ", existingAuthorNames);
@@ -198,7 +205,8 @@ namespace BookHistoryApi.Services
             }
             // Update the entity
             existingBook.UpdatedTime = DateTime.UtcNow;
-            _dbContext.Books.Update(_mapper.Map<Book>(existingBook));
+            // Save updates to the database
+            await _dbContext.SaveChangesAsync();
         }
 
         private async Task<bool> BookExistsAsync(int id)

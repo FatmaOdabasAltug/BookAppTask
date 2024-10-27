@@ -25,7 +25,7 @@ namespace BookHistoryApi.Services
             var bookHistory = _mapper.Map<BookHistory>(bookHistoryDto);
 
             // Add the new entity to the database
-            bookHistory.CreatedTime = DateTime.Now;
+            bookHistory.CreatedTime = DateTime.UtcNow;
             await _dbContext.BookHistories.AddAsync(bookHistory);
             await _dbContext.SaveChangesAsync();
         }

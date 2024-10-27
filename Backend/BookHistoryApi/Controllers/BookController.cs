@@ -17,7 +17,7 @@ namespace BookHistoryApi.Controllers
             _bookService = bookService;
         }
 
-        // GET: api/book
+        // GET: api/books
         [HttpGet]
         public async Task<ActionResult<IEnumerable<BookDto>>> GetBooks()
         {
