@@ -16,5 +16,11 @@ namespace BookHistoryApi.Models.Entities
 
         [Required]
         public required string ChangeDescription { get; set; }
+        [Required]
+        public required string OldValue { get; set; }
+        [Required]
+        public required string NewValue { get; set; }
+        [Required]
+        public required string ChangedProperty { get; set; }
     }
 }

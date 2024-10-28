@@ -1,6 +1,7 @@
 using System.Threading.Tasks;
 using AutoMapper;
 using BookHistoryApi.Data;
+using BookHistoryApi.Models.Constants;
 using BookHistoryApi.Models.DTOs;
 using BookHistoryApi.Models.Entities;
 using BookHistoryApi.Services.Interfaces;
@@ -30,16 +31,59 @@ namespace BookHistoryApi.Services
             await _dbContext.SaveChangesAsync();
         }
 
-        public async Task<IEnumerable<BookHistoryDto>> GetAllBookHistoriesAsync()
+        public async Task<IEnumerable<BookHistoryDto>> FilterBookHistoriesAsync(
+            BookHistoryFilterDto bookHistoryFilterDto
+        )
         {
-            // Retrieve all BookHistory records from the database
-            var bookHistories = await _dbContext.BookHistories.ToListAsync();
+            var query = _dbContext.BookHistories.AsQueryable();
 
-            // Map BookHistory records to BookHistoryDto
-            var bookHistoryDtos = _mapper.Map<IEnumerable<BookHistoryDto>>(bookHistories);
+            // Apply filtering
+            if (!string.IsNullOrEmpty(bookHistoryFilterDto.GroupBy))
+            {
+                var isGroupByNumeric = IsNumeric(bookHistoryFilterDto.GroupBy);
+                var groupBy = isGroupByNumeric
+                    ? bookHistoryFilterDto.GroupBy
+                    : bookHistoryFilterDto.GroupBy.Trim().ToUpper();
+                query = query.Where(b =>
+                    (isGroupByNumeric ? b.ChangedProperty : b.ChangedProperty.ToUpper()) == groupBy
+                );
+            }
 
-            // Return the list of DTOs
-            return bookHistoryDtos;
+            if (!string.IsNullOrEmpty(bookHistoryFilterDto.Filter))
+            {
+                bool isFilterNumeric = IsNumeric(bookHistoryFilterDto.Filter);
+                var filter = isFilterNumeric
+                    ? bookHistoryFilterDto.Filter
+                    : bookHistoryFilterDto.Filter.Trim().ToUpper();
+
+                query = query.Where(b =>
+                    (isFilterNumeric ? b.NewValue : b.NewValue.ToUpper()).Contains(filter)
+                    || (isFilterNumeric ? b.OldValue : b.OldValue.ToUpper()).Contains(filter)
+                    || (
+                        isFilterNumeric ? b.ChangeDescription : b.ChangeDescription.ToUpper()
+                    ).Contains(filter)
+                );
+            }
+
+            // Apply ordering
+            query =
+                bookHistoryFilterDto.OrderBy.ToUpper() == SortConstants.Ascending
+                    ? query.OrderBy(b => b.CreatedTime)
+                    : query.OrderByDescending(b => b.CreatedTime);
+
+            // Apply pagination
+            query = query
+                .Skip((bookHistoryFilterDto.PageNumber - 1) * bookHistoryFilterDto.PageSize)
+                .Take(bookHistoryFilterDto.PageSize);
+
+            var pagedBookHistory = await query.ToListAsync();
+
+            return _mapper.Map<IEnumerable<BookHistoryDto>>(pagedBookHistory);
+        }
+
+        private bool IsNumeric(string value)
+        {
+            return double.TryParse(value, out _);
         }
     }
 }

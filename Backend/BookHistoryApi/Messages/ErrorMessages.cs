@@ -32,5 +32,10 @@ namespace BookHistoryApi.Messages
             "The provided book ID does not match the ID of the book being updated.";
         public const string AtLeastOneAuthorRequired = "At least one author is required.";
         public const string ListCannotBeNullOrEmpty = "List cannot be null or empty";
+        public const string OrderMustBeAscendingOrDescending = "Order must be 'asc' or 'desc'.";
+        public const string MustBeGreaterThanZeroPageSize =
+            "Page size value must be greater than zero.";
+        public const string MustBeGreaterThanZeroPageNumber =
+            "Page number value must be greater than zero.";
     }
 }

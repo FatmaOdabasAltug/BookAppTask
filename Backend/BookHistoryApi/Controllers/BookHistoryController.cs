@@ -17,13 +17,17 @@ namespace BookHistoryApi.Controllers
             _bookHistoryService = bookHistoryService;
         }
 
-        // GET: api/bookHistories
+        // GET: api/filterBookHistories
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<BookHistoryDto>>> GetBookHistories()
+        public async Task<ActionResult<IEnumerable<BookHistoryDto>>> FilterBookHistories(
+            [FromQuery] BookHistoryFilterDto bookHistoryFilterDto
+        )
         {
             try
             {
-                var bookHistories = await _bookHistoryService.GetAllBookHistoriesAsync();
+                var bookHistories = await _bookHistoryService.FilterBookHistoriesAsync(
+                    bookHistoryFilterDto
+                );
                 return Ok(bookHistories);
             }
             catch (Exception ex)

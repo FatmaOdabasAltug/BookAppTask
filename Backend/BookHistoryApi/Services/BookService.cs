@@ -54,6 +54,8 @@ namespace BookHistoryApi.Services
 
         public async Task<BookDto> AddBookAsync(BookDto bookDto)
         {
+            TrimBookDtoProperties(bookDto);
+
             // Check if the title is unique
             if (!await IsTitleUniqueAsync(bookDto.Title))
             {
@@ -75,6 +77,9 @@ namespace BookHistoryApi.Services
                 // Add bookHistory
                 await PrepareBookHistoryAndAddAsync(
                     book.Id,
+                    string.Empty,
+                    book.Title,
+                    string.Format(InfoMessages.Title),
                     string.Format(InfoMessages.NewBookAdded, book.Title)
                 );
 
@@ -90,12 +95,13 @@ namespace BookHistoryApi.Services
                 await addTransaction.RollbackAsync();
 
                 // Log the exception or handle it as needed
-                throw new Exception("An error occurred while adding the book.", e);
+                throw new Exception(ErrorMessages.UnexpectedError, e);
             }
         }
 
         public async Task<BookDto> UpdateBookAsync(int bookId, BookDto bookDto)
         {
+            TrimBookDtoProperties(bookDto);
             // Check if the bookId matches with the bookDto.Id
             if (bookDto.Id != bookId)
             {
@@ -145,7 +151,7 @@ namespace BookHistoryApi.Services
                 await updateTransaction.RollbackAsync();
 
                 // Log the exception or handle it as needed
-                throw new Exception("An error occurred while updating the book.", e);
+                throw new Exception(ErrorMessages.UnexpectedError, e);
             }
         }
 
@@ -156,6 +162,9 @@ namespace BookHistoryApi.Services
             {
                 await PrepareBookHistoryAndAddAsync(
                     existingBook.Id,
+                    existingBook.Title,
+                    bookDto.Title,
+                    string.Format(InfoMessages.Title),
                     string.Format(InfoMessages.TitleChanged, existingBook.Title, bookDto.Title)
                 );
                 existingBook.Title = bookDto.Title;
@@ -165,19 +174,25 @@ namespace BookHistoryApi.Services
             {
                 await PrepareBookHistoryAndAddAsync(
                     existingBook.Id,
+                    existingBook.ShortDescription,
+                    bookDto.ShortDescription ?? String.Empty,
+                    string.Format(InfoMessages.Description),
                     string.Format(
                         InfoMessages.DescriptionChanged,
                         existingBook.ShortDescription,
                         bookDto.ShortDescription
                     )
                 );
-                existingBook.ShortDescription = bookDto.ShortDescription;
+                existingBook.ShortDescription = bookDto.ShortDescription ?? String.Empty;
             }
 
             if (existingBook.PublishDate != bookDto.PublishDate)
             {
                 await PrepareBookHistoryAndAddAsync(
                     existingBook.Id,
+                    existingBook.PublishDate.ToString(),
+                    bookDto.PublishDate.ToString(),
+                    string.Format(InfoMessages.PublishDate),
                     string.Format(
                         InfoMessages.PublishDateChanged,
                         existingBook.PublishDate,
@@ -198,6 +213,9 @@ namespace BookHistoryApi.Services
                 var newAuthors = string.Join(", ", newAuthorNames);
                 await PrepareBookHistoryAndAddAsync(
                     existingBook.Id,
+                    oldAuthors,
+                    newAuthors,
+                    string.Format(InfoMessages.Authors),
                     string.Format(InfoMessages.AuthorsChanged, oldAuthors, newAuthors)
                 );
 
@@ -207,6 +225,12 @@ namespace BookHistoryApi.Services
             existingBook.UpdatedTime = DateTime.UtcNow;
             // Save updates to the database
             await _dbContext.SaveChangesAsync();
+        }
+
+        private void TrimBookDtoProperties(BookDto bookDto)
+        {
+            bookDto.Title = bookDto.Title.Trim();
+            bookDto.ShortDescription = bookDto.ShortDescription?.Trim();
         }
 
         private async Task<bool> BookExistsAsync(int id)
@@ -219,11 +243,20 @@ namespace BookHistoryApi.Services
             return await _dbContext.Books.AllAsync(b => b.Title != title);
         }
 
-        private async Task PrepareBookHistoryAndAddAsync(int bookId, string description)
+        private async Task PrepareBookHistoryAndAddAsync(
+            int bookId,
+            string oldValue,
+            string newValue,
+            string changedProperty,
+            string description
+        )
         {
             var bookHistoryDto = new BookHistoryDto
             {
                 BookId = bookId,
+                OldValue = oldValue,
+                NewValue = newValue,
+                ChangedProperty = changedProperty,
                 ChangeDescription = description,
             };
 

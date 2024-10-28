@@ -1,6 +1,5 @@
 using BookHistoryApi.Messages;
 using BookHistoryApi.Models.DTOs; // Import the constants namespace
-using BookHistoryApi.Models.Entities;
 using BookHistoryApi.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
